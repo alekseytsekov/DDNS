@@ -17,7 +17,7 @@ contract Ownable {
 contract DDNS is Ownable {
     
     struct Receipt{
-        bytes domainName;
+        //bytes domainName;
         uint amountPaidWei; 
         uint timestamp; // created on 
         uint expires;
@@ -132,7 +132,7 @@ contract DDNS is Ownable {
         
         registeredDomains[domainHash] = true;
         domainOwners[domainHash] = msg.sender;
-        ownerReceipts[msg.sender][domainHash].push(Receipt({domainName : domain, amountPaidWei : msg.value, timestamp: now, expires: now + 1 years}));
+        ownerReceipts[msg.sender][domainHash].push(Receipt({amountPaidWei : msg.value, timestamp: now, expires: now + 1 years}));
         domainIp[domainHash] = ip;
         domainExpirationDate[domainHash] = now + 1 years;
         
@@ -164,7 +164,7 @@ contract DDNS is Ownable {
         uint lastReceipt = ownerReceipts[msg.sender][domainHash].length;
         
         // assign domain to new owner and create receipt to describe transfer event paid amound should be 0 
-        ownerReceipts[newOwner][domainHash].push(Receipt({domainName : domain, amountPaidWei : 0, timestamp: now, expires: ownerReceipts[msg.sender][domainHash][lastReceipt - 1].expires }));
+        ownerReceipts[newOwner][domainHash].push(Receipt({ amountPaidWei : 0, timestamp: now, expires: ownerReceipts[msg.sender][domainHash][lastReceipt - 1].expires }));
         
         //emit LogTransferDomain(newOwner, msg.sender, domainHash);
         LogTransferDomain(newOwner, msg.sender, domainHash);
@@ -174,7 +174,7 @@ contract DDNS is Ownable {
         
         bytes32 domainHash = keccak256(domain);
         uint lastReceiptIndex = ownerReceipts[msg.sender][domainHash].length;
-        ownerReceipts[msg.sender][domainHash].push(Receipt({domainName : domain, amountPaidWei : msg.value, timestamp: now, expires: ownerReceipts[msg.sender][domainHash][lastReceiptIndex - 1].expires + 1 years }));
+        ownerReceipts[msg.sender][domainHash].push(Receipt({ amountPaidWei : msg.value, timestamp: now, expires: ownerReceipts[msg.sender][domainHash][lastReceiptIndex - 1].expires + 1 years }));
         
         domainExpirationDate[domainHash] = ownerReceipts[msg.sender][domainHash][lastReceiptIndex].expires;
         
