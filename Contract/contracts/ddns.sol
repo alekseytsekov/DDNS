@@ -43,14 +43,14 @@ contract DDNS is Ownable {
     mapping(bytes32 => bytes4) private domainIp;
     
     // get domain expiration update
-    mapping(bytes32 => uint) domainExpirationDate;
+    mapping(bytes32 => uint) private domainExpirationDate;
     
     // all info about owner  and its domains
-    mapping(address => mapping(bytes32 => Receipt[])) private ownerDomains;
+    mapping(address => mapping(bytes32 => Receipt[])) private ownerReceipts;
     
-    event LogRegister(address indexed addr, bytes indexed _domain, uint indexed createdOn);
-    event LogTransferDomain(address indexed newOwner, address indexed oldOwner, bytes indexed _domain);
-    event LogUpdateExipationDate(address owner, bytes indexed _domain, uint indexed expirationDate);
+    event LogRegister(address indexed addr, bytes32 _domain, uint indexed createdOn);
+    event LogTransferDomain(address indexed newOwner, address indexed oldOwner, bytes32 indexed _domain);
+    event LogUpdateExipationDate(address owner, bytes32 indexed _domain, uint indexed expirationDate);
     
     modifier domainMinLenght(bytes domain){
         require(domain.length >= 5);
@@ -58,7 +58,22 @@ contract DDNS is Ownable {
     }
     
     modifier isDomainFree(bytes domain){
-        require(!registeredDomains[keccak256(domain)]);
+        bytes32 domainHash = keccak256(domain);
+        
+        if(!registeredDomains[domainHash]){
+            require(true);
+        } else {
+            
+            // check is domain active
+            if(now < domainExpirationDate[domainHash]){
+                require(false);
+            } else {
+                
+                clearDomain(domainHash);
+                require(true);
+            }
+        }
+        
         _;
     }
     
@@ -78,18 +93,25 @@ contract DDNS is Ownable {
     }
     
     modifier isActive(bytes domain) {
-        if(domainExpirationDate[keccak256(domain)] < now){
+        
+        bytes32 domainHash = keccak256(domain);
+        
+        if(now < domainExpirationDate[domainHash]){
             require(true);
         } else {
-            registeredDomains[keccak256(domain)] = false;
-            
-            // depends on business logic
-            domainOwners[keccak256(domain)] = address(0);
-            
+            //clearDomain(domainHash);
             require(false);
         }
-        
+
         _;
+    }
+    
+    function clearDomain(bytes32 domainHash) private {
+        
+        registeredDomains[domainHash] = false;
+            
+        // depends on business logic
+        domainOwners[domainHash] = address(0);
     }
     
     function getPrice(bytes domain) public pure domainMinLenght(domain) returns (uint) {
@@ -110,16 +132,16 @@ contract DDNS is Ownable {
         
         registeredDomains[domainHash] = true;
         domainOwners[domainHash] = msg.sender;
-        ownerDomains[msg.sender][domainHash].push(Receipt({domainName : domain, amountPaidWei : msg.value, timestamp: now, expires: now + 1 years}));
+        ownerReceipts[msg.sender][domainHash].push(Receipt({domainName : domain, amountPaidWei : msg.value, timestamp: now, expires: now + 1 years}));
         domainIp[domainHash] = ip;
         domainExpirationDate[domainHash] = now + 1 years;
         
-        if(ownerDomains[msg.sender][domainHash].length < 1) {
+        if(ownerReceipts[msg.sender][domainHash].length == 1) {
             ownerAllDomains[msg.sender].push(Domain({domainName : domain}));
         }
         
-        
-        emit LogRegister(msg.sender, domain, now);
+        //emit LogRegister(msg.sender, domainHash, now);
+        LogRegister(msg.sender, domainHash, now);
     }
     
     
@@ -134,36 +156,61 @@ contract DDNS is Ownable {
         
         domainOwners[domainHash] = newOwner;
         
-        if(ownerDomains[newOwner][domainHash].length < 1) {
+        if(ownerReceipts[newOwner][domainHash].length < 1) {
             ownerAllDomains[msg.sender].push(Domain({domainName : domain}));
         }
         
-        
-        // mapping(address => mapping(bytes32 => Receipt[])) private ownerDomains;
         // get index of last receipt
-        uint lastReceipt = ownerDomains[msg.sender][domainHash].length;
+        uint lastReceipt = ownerReceipts[msg.sender][domainHash].length;
         
         // assign domain to new owner and create receipt to describe transfer event paid amound should be 0 
-        ownerDomains[newOwner][domainHash].push(Receipt({domainName : domain, amountPaidWei : 0, timestamp: now, expires: ownerDomains[msg.sender][domainHash][lastReceipt - 1].expires }));
+        ownerReceipts[newOwner][domainHash].push(Receipt({domainName : domain, amountPaidWei : 0, timestamp: now, expires: ownerReceipts[msg.sender][domainHash][lastReceipt - 1].expires }));
         
-        emit LogTransferDomain(newOwner, msg.sender, domain);
+        //emit LogTransferDomain(newOwner, msg.sender, domainHash);
+        LogTransferDomain(newOwner, msg.sender, domainHash);
     }
     
-    function extendExirationDate(bytes domain) public payable isActive(domain) canEdit(domain) isPriceMatch(domain) {
+    function extendExpirationDate(bytes domain) public payable isActive(domain) canEdit(domain) isPriceMatch(domain) {
         
         bytes32 domainHash = keccak256(domain);
-        uint lastReceiptIndex = ownerDomains[msg.sender][domainHash].length;
-        ownerDomains[msg.sender][domainHash].push(Receipt({domainName : domain, amountPaidWei : msg.value, timestamp: now, expires: ownerDomains[msg.sender][domainHash][lastReceiptIndex - 1].expires + 1 years }));
+        uint lastReceiptIndex = ownerReceipts[msg.sender][domainHash].length;
+        ownerReceipts[msg.sender][domainHash].push(Receipt({domainName : domain, amountPaidWei : msg.value, timestamp: now, expires: ownerReceipts[msg.sender][domainHash][lastReceiptIndex - 1].expires + 1 years }));
         
-        domainExpirationDate[domainHash] = ownerDomains[msg.sender][domainHash][lastReceiptIndex].expires;
+        domainExpirationDate[domainHash] = ownerReceipts[msg.sender][domainHash][lastReceiptIndex].expires;
         
-        emit LogUpdateExipationDate(msg.sender, domain, ownerDomains[msg.sender][domainHash][lastReceiptIndex].expires);
+        //emit LogUpdateExipationDate(msg.sender, domainHash, ownerReceipts[msg.sender][domainHash][lastReceiptIndex].expires);
+        LogUpdateExipationDate(msg.sender, domainHash, ownerReceipts[msg.sender][domainHash][lastReceiptIndex].expires);
+    }
+
+    function getOwnerReceiptByDomain(bytes domain) public view returns (uint[], uint[], uint[]) {
+        //uint amountPaidWei; 
+        //uint timestamp; // created on 
+        //uint expires;
+        
+        bytes32 domainHash = keccak256(domain);
+        
+        uint[] memory price = new uint[](ownerReceipts[msg.sender][domainHash].length);
+        uint[] memory createdOn = new uint[](ownerReceipts[msg.sender][domainHash].length);
+        uint[] memory expires = new uint[](ownerReceipts[msg.sender][domainHash].length);
+        
+        // ownerAllDomains[msg.sender].length - is number of receipts per domain
+        
+        for(uint i = 0; i < ownerReceipts[msg.sender][domainHash].length; i++){
+            price[i] = ownerReceipts[msg.sender][domainHash][i].amountPaidWei;
+            createdOn[i] = ownerReceipts[msg.sender][domainHash][i].timestamp;
+            expires[i] = ownerReceipts[msg.sender][domainHash][i].expires;
+        }
+        
+        return (price, createdOn, expires);
     }
     
-    function getIP(bytes domain) public isDomainExist(domain) isActive(domain) returns (bytes4) {
-        //require(registeredDomains[keccak256(domain)]);
-        
-        return (domainIp[keccak256(domain)]);
+    function getIP(bytes domain) public view isDomainExist(domain) isActive(domain) returns (bytes4) {
+        //isActive(domain)
+        return domainIp[keccak256(domain)];
+    }
+
+    function getDomainOwner(bytes domain) public view returns (address) {
+        return domainOwners[keccak256(domain)];
     }
     
     function getDomainCount() public view returns (uint) {
@@ -172,5 +219,14 @@ contract DDNS is Ownable {
     
     function getOwnerDomain(uint index) public view returns (bytes) {
         return ownerAllDomains[msg.sender][index].domainName;
+    }
+    
+    function isDomainRegister(bytes domain) public view returns (bool) {
+        return registeredDomains[keccak256(domain)];
+    }
+    
+    function withdraw() public isOwner {
+        require(address(this).balance > 0);
+        owner.transfer(address(this).balance);
     }
 }
