@@ -1,0 +1,92 @@
+<div class="row">
+    <div class="col-xs-12 text-center">
+        <h1><b>Check domain availability</b></h1>
+    </div>
+
+    <br>
+
+    <div class="form-group col-xs-8 col-xs-offset-2">
+
+        <br>
+        <br>
+        <br>
+
+        <div class="form-label"><label for="userAddress" class="form">Current address</label></div>
+        <input class="form-control" id="userAddress" type="text">
+        <br>
+        <label for="domain-name">Domain name</label>
+        <input class="form-control" id="domain-name" name="domain-name" type="text" placeholder="domain name"> 
+        <br>
+        <button id="btn-domain-check" type="button" class="btn btn-default">Check</button>
+
+    </div>
+
+    <div class="form-group col-xs-8 col-xs-offset-2">
+
+        <br>
+
+        <div id="show-result" class="msg-result"></div>
+
+    </div>
+
+</div>
+
+<script>
+    window.addEventListener('load', function(){
+        if(hasMetaMask){
+
+            $('#btn-domain-check').click(checkDomainAvailability);
+
+            function checkDomainAvailability(){
+                let userAddress = $('#userAddress').val();
+                let domainName = $('#domain-name').val();
+
+                //if (!isAddressValid(userAddress)) {
+                    //return;
+                //}
+
+                let option = {
+                    from: userAddress,
+                    //value: `${web3.toWei(1, 'ether')}`,
+                    gas: 1000000,
+                };
+
+                contract.isDomainRegister(domainName, option, function (err, result) {
+                    if (err) {
+                        //showErrorMsg("Something went wrong!");
+                        console.log(err);
+                        return;
+                    }
+
+                    if(result){
+                        $('#show-result').text('Domain has been registered!');
+                        $('#show-result').removeClass('success-msg');
+                        $('#show-result').addClass('error-msg');
+                    } else {
+                        $('#show-result').text('Domain is NOT registered!');
+                        $('#show-result').removeClass('error-msg');
+                        $('#show-result').addClass('success-msg');
+                    }
+                });
+
+                if(true){
+
+                    //  only check domain ip is it correct....
+                    contract.getIP(domainName, option, function (err, result) {
+                        if (err) {
+                            //showErrorMsg("Something went wrong!");
+                            console.log(err);
+                            return;
+                        }
+
+                        console.log(ipConverter.hex2ip(result));
+                    });
+                }
+            }
+        }
+
+        
+    })
+</script>
+
+<script src="/javascripts/ipConverter.js"></script>

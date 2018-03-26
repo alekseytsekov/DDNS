@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>{{title}}</title>
+	{{!-- <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css"> --}}
+	{{!-- <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css"> --}}
+	{{!-- <link href="/stylesheets/style.css" type="text/css" rel="stylesheet"> --}}
+	{{!-- <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous">
+	</script> --}}
+	{{!-- <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script> --}}
+
+	<link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+	<link rel="stylesheet" href="/stylesheets/bootstrap.theme.min.css">
+	<link href="/stylesheets/style.css" type="text/css" rel="stylesheet">
+	<script src="/javascripts/jQuery-3.2.1.js"></script>
+	<script src="/javascripts/bootstrap3.js"></script>
+
+	{{!-- <script src="https://wzrd.in/standalone/buffer"></script> --}}
+	{{!--
+	<script src="https://unpkg.com/ipfs-api@9.0.0/dist/index.js" integrity="sha384-5bXRcW9kyxxnSMbOoHzraqa7Z0PQWIao+cgeg327zit1hz5LZCEbIMx/LWKPReuB"
+	    crossorigin="anonymous"></script> --}} {{!--
+	<script src="/javascripts/web3.js"></script> --}}
+
+	<script>
+
+		const shouldGetProducts = '{{shouldGetProducts}}';
+
+		let contract = {};
+		let contractOwner = "0x627306090abab3a6e1400e9345bc60c78a8bef57";
+
+		let contractAddress = "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da";
+		let contractAbi = [{"constant":true,"inputs":[{"name":"index","type":"uint256"}],"name":"getOwnerDomain","outputs":[{"name":"","type":"bytes"}],"payable":false,"stateMutability":"view","type":"function","signature":"0x0dc47714"},{"constant":true,"inputs":[],"name":"getDomainCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function","signature":"0x13e91f08"},{"constant":false,"inputs":[{"name":"domain","type":"bytes"},{"name":"newIp","type":"bytes4"}],"name":"edit","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function","signature":"0x1673f008"},{"constant":false,"inputs":[],"name":"withdraw","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function","signature":"0x3ccfd60b"},{"constant":true,"inputs":[{"name":"domain","type":"bytes"}],"name":"getPrice","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"pure","type":"function","signature":"0x6b4dd158"},{"constant":false,"inputs":[{"name":"domain","type":"bytes"}],"name":"extendExpirationDate","outputs":[],"payable":true,"stateMutability":"payable","type":"function","signature":"0x6bdc53ce"},{"constant":true,"inputs":[{"name":"domain","type":"bytes"}],"name":"getOwnerReceiptByDomain","outputs":[{"name":"","type":"uint256[]"},{"name":"","type":"uint256[]"},{"name":"","type":"uint256[]"}],"payable":false,"stateMutability":"view","type":"function","signature":"0x6c007ace"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function","signature":"0x8da5cb5b"},{"constant":false,"inputs":[{"name":"domain","type":"bytes"},{"name":"newOwner","type":"address"}],"name":"transferDomain","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function","signature":"0x9df35ba7"},{"constant":true,"inputs":[{"name":"domain","type":"bytes"}],"name":"getIP","outputs":[{"name":"","type":"bytes4"}],"payable":false,"stateMutability":"view","type":"function","signature":"0xb21659f2"},{"constant":true,"inputs":[{"name":"domain","type":"bytes"}],"name":"isDomainRegister","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function","signature":"0xe79f80f8"},{"constant":false,"inputs":[{"name":"domain","type":"bytes"},{"name":"ip","type":"bytes4"}],"name":"register","outputs":[],"payable":true,"stateMutability":"payable","type":"function","signature":"0xefacd294"},{"constant":true,"inputs":[{"name":"domain","type":"bytes"}],"name":"getDomainOwner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function","signature":"0xf2c79a59"},{"anonymous":false,"inputs":[{"indexed":true,"name":"addr","type":"address"},{"indexed":false,"name":"_domain","type":"bytes32"},{"indexed":true,"name":"createdOn","type":"uint256"}],"name":"LogRegister","type":"event","signature":"0xc81079f356f6d7929603ef7d56baa5f69ea6bb5a4f7c42863af184cdfcebb92d"},{"anonymous":false,"inputs":[{"indexed":true,"name":"newOwner","type":"address"},{"indexed":true,"name":"oldOwner","type":"address"},{"indexed":true,"name":"_domain","type":"bytes32"}],"name":"LogTransferDomain","type":"event","signature":"0xee1aa85cb84539744239d4d052fbc04c183b143f273ef3be77b5b887422bbab8"},{"anonymous":false,"inputs":[{"indexed":false,"name":"owner","type":"address"},{"indexed":true,"name":"_domain","type":"bytes32"},{"indexed":true,"name":"expirationDate","type":"uint256"}],"name":"LogUpdateExipationDate","type":"event","signature":"0x1120805c253568e0b57de50d1dcad3a3ca4de588b9c4b2013e84173f76c8b1dd"}];
+
+		//console.log(contractOwner);
+		//console.log(contractAddress);
+
+		let hasMetaMask = false;
+
+		window.addEventListener('load', function () {
+
+			if (typeof window.web3 !== "undefined" && typeof window.web3.currentProvider !== "undefined") {
+
+				web3 = new Web3(web3.currentProvider);
+				hasMetaMask = true;
+				myWeb3 = web3;
+
+			} 
+			//else {
+				//web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/ri45PYMaMiRFCfZh2H5a"));
+				//web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+			//}
+
+			if (!hasMetaMask) {
+				showMetaMask();
+				function showMetaMask() {
+					$('#getMetaMask').removeClass('hide-me');
+					$('#getMetaMask').show();
+				}
+			} else {
+				contract = web3.eth.contract(contractAbi).at(contractAddress);
+				web3.eth.getAccounts(function (err, res) {
+					if (err) {
+						console.log(err);
+						return;
+					}
+
+					$('#userAddress').prop('readonly', true);
+					$('#userAddress').val(res[0]);
+
+					console.log(web3);
+					
+				});
+			}
+		});
+
+	</script>
+
+</head>
+
+<body>
+
+	<div class="row">
+		<div id="getMetaMask" class="col-xs-12 text-center msg info-msg hide-me">
+			<span>Please install </span>
+			<a target="_blank" href="https://metamask.io/">MetaMask</a>
+		</div>
+	</div>
+
+	<div class="row text-center">
+		<div class="col-xs-12">
+			<h1>DDNS</h1>
+		</div>
+		<div class="col-xs-12">
+			<h3>Buy a domain.</h3>
+		</div>
+	</div>
+
+	<div class="row">
+
+		<div class="col-xs-12 col-sm-6 col-md-2">
+			
+			{{>sideNav}}
+
+		</div>
+
+		<div class="col-xs-8">
+			<div class="">
+
+				<div class="row">
+
+					<div class="error-msg msg hide-me" class="col-xs-12"></div>
+					<div class="success-msg msg hide-me" class="col-xs-12"></div>
+
+				</div>
+
+				{{{body}}}
+			</div>
+		</div>
+
+	</div>
+
+</body>
+
+<script src="/javascripts/msgHandler.js"></script>
+
+</html>

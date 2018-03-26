@@ -1,0 +1,88 @@
+<div class="row">
+    <div class="col-xs-12 text-center">
+        <h1><b>Get domain price</b></h1>
+    </div>
+
+    <br>
+
+    <div class="form-group col-xs-6 col-xs-offset-3">
+
+        <br>
+        <br>
+        <br>
+
+        <div class="form-label"><label for="userAddress" class="form">Current address</label></div>
+        <input class="form-control" id="userAddress" type="text">
+        <br>
+        <label for="domain-name">Domain name</label>
+        <input class="form-control" id="domain-name" name="domain-name" type="text" placeholder="domain name"> 
+        <br>
+        <button id="btn-domain-getprice" type="button" class="btn btn-default">Get Price</button>
+
+    </div>
+
+    <div class="form-group col-xs-6 col-xs-offset-3">
+
+        <br>
+        <label for="show-result">Price</label>
+        <input id="show-result" name="show-result" class="form-control" type="text" readonly>
+
+    </div>
+
+</div>
+
+<script>
+    window.addEventListener('load', function(){
+        if(hasMetaMask){
+
+            $('#btn-domain-getprice').click(getDomainPrice);
+
+            function getDomainPrice(){
+                let userAddress = $('#userAddress').val();
+                let domainName = $('#domain-name').val();
+
+                if (domainName.length < 5) {
+                    msgHandler.showErrorMsg('Domain length should be more than 4 symbols!')
+                    return;
+                }
+
+                let option = {
+                    from: userAddress,
+                    //value: `${web3.toWei(1, 'ether')}`,
+                    gas: 1000000,
+                };
+
+                contract.getPrice(domainName, option, function (err, result) {
+                    if (err) {
+                        //showErrorMsg("Something went wrong!");
+                        console.log(err);
+                        return;
+                    }
+
+
+                    $('#show-result').val(web3._extend.utils.fromWei(result, 'ether'));
+                    //$('#show-result').removeClass('success-msg');
+                    //$('#show-result').addClass('error-msg');
+                });
+
+                if(true){
+
+                    //  only check domain ip is it correct....
+                    contract.getIP(domainName, option, function (err, result) {
+                        if (err) {
+                            //showErrorMsg("Something went wrong!");
+                            console.log(err);
+                            return;
+                        }
+
+                        console.log(ipConverter.hex2ip(result));
+                    });
+                }
+            }
+        }
+
+        
+    })
+</script>
+
+<script src="/javascripts/ipConverter.js"></script>
