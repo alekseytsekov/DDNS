@@ -36,8 +36,8 @@
                 let domainName = $('#domain-name').val();
                 let ipAddress = $('#ip-address').val();
 
-                if (domainName.length < 5) {
-                    msgHandler.showErrorMsg('Domain length should be more than 4 symbols!')
+                if (domainName.length < 5 || domainName.length > 50) {
+                    msgHandler.showErrorMsg('Domain name length range should be greater than 4 and less than 50 symbols!')
                     return;
                 }
 

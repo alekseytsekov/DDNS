@@ -67,6 +67,10 @@ button a {
 	max-height: 45rem;
 }
 
+.w-50 {
+	width: 50%;
+}
+
 .w-100 {
 	width: 100%;
 }
@@ -74,4 +78,8 @@ button a {
 .inline-block {
 	max-width: 80%;
 	display: inline-block;
+}
+
+.active {
+	background-color: gold!important;
 }

@@ -1,0 +1,156 @@
+<div class="row">
+    <div class="col-xs-12 text-center">
+        <h1><b>Domain receipts</b></h1>
+        <br>
+    <br>
+    </div>
+
+    
+
+    <div id="domain-wrapper" class="col-xs-3">
+
+    </div>
+
+    <div class="col-xs-9">
+
+        <table id="receipts-table" class="hide-me table table-bordered table-striped table-hover"> 
+            <thead>
+                <tr>
+                    <th>Paid value</th>
+                    <th>Paid on</th>
+                    <th>Expires on</th>
+                </tr>
+            </thead>
+            <tbody id="receipts-wrapper">
+                
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    window.addEventListener('load', function(){
+        if(hasMetaMask){
+
+            //$('#btn-domain-extend-exp-date').click(extendDomainExpDate);
+
+            getOwnerDomains();
+            function getOwnerDomains(){
+
+                let option = {
+                    from: currentUserAddress,
+                    gas: 1000000,
+                };
+
+                contract.getDomainCount(option, function(err, result){
+
+                    let numOfDomains = parseInt(result);
+                    let hasDomain = numOfDomains > 0;
+                    let names = [];
+
+                    if(hasDomain){
+
+                        for(let i = 0; i < numOfDomains; i++){
+                            contract.getOwnerDomain(i, option, function (err, result) {
+                                if (err) {
+                                    msgHandler.showErrorMsg("Something went wrong!");
+                                    console.log(err);
+                                    return;
+                                }
+
+                                names.push(web3._extend.utils.toAscii(result));
+
+                                if(i + 1 == numOfDomains){
+                                    renderDomains(names);
+                                }
+                            });
+                        }
+
+                    } else {
+                        msgHandler.showInfoMsg(`You don't have any domains!`);
+                    }
+                    
+                });
+
+                function renderDomains(domainNames){
+                    
+                    //console.log(domainNames);
+
+                    let domainWrapper = $('#domain-wrapper');
+                    domainNames.forEach(domain => {
+                        
+                        let element = `<div class="form-group row" data-dname="${domain}"><div class="col-xs-12">
+                <button class="btn btn-default domain-receipt w-50" type="button">${domain}</button></div></div>`;
+
+                        domainWrapper.append(element);
+                    });
+
+                    $('.domain-receipt').click(getReceiptsByDomain);
+                }
+
+                function getReceiptsByDomain(){
+
+                    $('.domain-receipt').removeClass('active');
+                    $(this).addClass('active');
+                    
+                    //let dName = $(this).data('dname');
+                    let dName = $(this).text();
+
+                    contract.getOwnerReceiptByDomain(dName, option, function (err, result) {
+                        if (err) {
+                            msgHandler.showErrorMsg("Something went wrong!");
+                            console.log(err);
+                            return;
+                        }
+
+                        //console.log(result);
+                        let numOfReceipts = result[0].length;
+
+                        let receiptsWrapper = $('#receipts-wrapper');
+                        receiptsWrapper.text('');
+                        $('#receipts-table').removeClass('hide-me');
+
+                        for(let i = 0; i < numOfReceipts; i++){
+                            let paidPrice =  web3._extend.utils.fromWei(JSON.parse(result[0][i]), 'ether');
+                            let paidOn = timeConverter(JSON.parse(result[1][i]));
+                            let expiresOn = timeConverter(JSON.parse(result[2][i]))
+
+                            let receiptElement = `<tr>
+                                                    <td>${paidPrice} ethers</td>
+                                                    <td>${paidOn}</td>
+                                                    <td>${expiresOn}</td>
+                                                </tr>`;
+                            receiptsWrapper.append(receiptElement);
+                        }
+
+
+                    });
+                }
+
+                
+
+                function timeConverter(UNIX_timestamp){
+                    var a = new Date(UNIX_timestamp * 1000);
+                    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    var year = a.getFullYear();
+                    var month = months[a.getMonth()];
+                    var date = a.getDate();
+                    var hour = a.getHours();
+                    var min = a.getMinutes();
+                    var sec = a.getSeconds();
+                    var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+                    return time;
+                }
+
+
+            }
+
+            
+        }
+
+        
+    })
+</script>
+
+{{!-- <script src="/javascripts/ipConverter.js"></script> --}}
