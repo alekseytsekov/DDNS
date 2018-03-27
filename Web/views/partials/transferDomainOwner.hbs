@@ -1,0 +1,94 @@
+<div class="row">
+    <div class="col-xs-12 text-center">
+        <h1><b>Transfer domain owner</b></h1>
+    </div>
+
+    <br>
+
+    <div class="form-group col-xs-6 col-xs-offset-3">
+
+        <br>
+        <br>
+        <br>
+
+        <div class="form-label"><label for="userAddress" class="form">Current address</label></div>
+        <input class="form-control" id="userAddress" type="text">
+        <br>
+        <label for="domain-name">Domain name</label>
+        <input class="form-control" id="domain-name" name="domain-name" type="text" placeholder="domain name"> 
+        <br>
+        <label for="new-domain-owner">New domain owner</label>
+        <input class="form-control" id="new-domain-owner" name="new-domain-owner" type="text" placeholder="new domain owner"> 
+        <br>
+        <button id="btn-domain-change-owner" type="button" class="btn btn-danger">Save</button>
+
+    </div>
+
+</div>
+
+<script>
+    window.addEventListener('load', function(){
+        if(hasMetaMask){
+
+            $('#btn-domain-change-owner').click(changeDomainOwner);
+
+            function changeDomainOwner(){
+
+                msgHandler.showErrorMsg('That action cannot be rolled back!');
+                if(!confirm('Are you want to transfer domain ownership!')){
+                    return;
+                }
+
+                let domainName = $('#domain-name').val();
+                let newDomainOwner = $('#new-domain-owner').val();
+
+                if (domainName.length < 5) {
+                    msgHandler.showErrorMsg('Domain length should be more than 4 symbols!')
+                    return;
+                }
+
+                if(!web3._extend.utils.isAddress(newDomainOwner)){
+                    msgHandler.showErrorMsg('Owner address is INVALID!');
+                    return;
+                }
+
+                let option = {
+                    from: currentUserAddress,
+                    gas: 1000000,
+                };
+
+                contract.getDomainOwner(domainName, option, function(err, result){
+
+                    let isUserCurrentOwner = currentUserAddress === result;
+                    if(isUserCurrentOwner){
+
+                        contract.transferDomain(domainName, newDomainOwner, option, function (err, result) {
+                            if (err) {
+                                msgHandler.showErrorMsg('Please make sure that your domain name was entered correctly!');
+                                console.log(err);
+                                return;
+                            }
+
+                            // tx hash
+                            let msg =
+                            `Successfully transfer domain ownership! Transaction hash: <a target="_blank" href="https://ropsten.etherscan.io/tx/${result}">${result}</a>`;
+                            msgHandler.showSuccessMsg(msg);
+
+                            $('#domain-name').val('');
+                            $('#new-domain-owner').val('');
+                        });
+
+                    } else {
+                        msgHandler.showErrorMsg('You are NOT owner of this domain!');
+                    }
+                    
+                });
+
+            }
+        }
+
+        
+    })
+</script>
+
+<script src="/javascripts/ipConverter.js"></script>

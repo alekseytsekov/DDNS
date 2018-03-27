@@ -31,6 +31,7 @@ button a {
 }
 
 .info-msg {
+	font-size: 1.5rem!important;
 	color: orange;
 	background-color: black;
 
@@ -39,6 +40,11 @@ button a {
 .error-msg {
 	color: white;
 	background-color: red;
+}
+
+.info-msg {
+	color: white;
+	background-color: #cce6ff;
 }
 
 .success-msg {
@@ -63,4 +69,9 @@ button a {
 
 .w-100 {
 	width: 100%;
+}
+
+.inline-block {
+	max-width: 80%;
+	display: inline-block;
 }

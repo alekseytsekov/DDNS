@@ -42,10 +42,3 @@ DDNSContract.deploy({
 
 		//console.log(`Address: ${JSON.parse(instance.options)}`);
 	});
-
-
-
-//console.log(web3.eth.accounts);
-//console.log(instance);//
-//console.log(instance.options);
-//console.log(instance.options.address);

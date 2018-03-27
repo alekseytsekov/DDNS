@@ -1,0 +1,62 @@
+<div class="row">
+
+    <div class="form-group col-xs-8 col-xs-offset-2 text-center">
+
+        <input class="form-control inline-block" id="browse-domain" type="text" placeholder="enter domain name" tabindex="1"> 
+        <button id="btn-domain-register" type="button" class="btn btn-success inline-block" tabindex="2">Go</button>
+    </div>
+
+    <div class="col-xs-12 text-center">
+         <a id="browse-wrapper" href="" target="_blank"></a> 
+    </div>
+
+</div>
+
+<script>
+    window.addEventListener('load', function(){
+        if(hasMetaMask){
+
+            let input = document.getElementById("browse-domain");
+            input.addEventListener("keyup", function(event) {
+                event.preventDefault();
+                if (event.keyCode === 13) {
+                    document.getElementById("btn-domain-register").click();
+                }
+            });
+
+            $('#btn-domain-register').click(browse);
+
+            function browse(){
+                let domainName = $('#browse-domain').val();
+
+                if (domainName.length < 5) {
+                    msgHandler.showErrorMsg('Domain length should be more than 4 symbols!')
+                    return;
+                }
+
+                let option = {
+                    from: currentUserAddress,
+                    gas: 1000000,
+                };
+
+                contract.getIP(domainName, option, function (err, result) {
+                    if (err) {
+                        msgHandler.showInfoMsg("Invalid domain name! Please check domain registration.");
+                        //console.log(err);
+                        return;
+                    }
+
+                    console.log(ipConverter.hex2ip(result));
+                    //let domainIp = 'http://' +  ipConverter.hex2ip(result);
+                    let domainIp =  ipConverter.hex2ip(result);
+
+                    $('#browse-wrapper').attr('href', domainIp);
+                    $('#browse-wrapper').html('open domain in new tab:' + `<h3 class="inline-block">${domainName}</h3>`);
+                });
+
+            }
+        }
+    })
+</script>
+
+<script src="/javascripts/ipConverter.js"></script>

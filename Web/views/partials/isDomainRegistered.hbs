@@ -41,9 +41,10 @@
                 let userAddress = $('#userAddress').val();
                 let domainName = $('#domain-name').val();
 
-                //if (!isAddressValid(userAddress)) {
-                    //return;
-                //}
+                if (domainName.length < 5) {
+                    msgHandler.showErrorMsg('Domain length should be more than 4 symbols!')
+                    return;
+                }
 
                 let option = {
                     from: userAddress,

@@ -1,21 +1,26 @@
 
-// const auth = require('./../utils/auth');
-// const globals = require('./globals');
 
-const home = require('./../controllers/homeController');
-const register = require('./../controllers/registerController');
+const homeController = require('./../controllers/homeController');
+const registerController = require('./../controllers/registerController');
+const editController = require('./../controllers/editController');
 
 // const ipfs = require('./../controllers/ipfsController');
 
 module.exports = app => {
     
     //home
-    app.get('/', home.list);
-    app.get('/domain/register', register.register);
-    app.get('/domain/isregistered', register.isRegistered);
-    app.get('/domain/getPrice', register.getPrice);
-    // app.get('/seller/checkBalance', seller.checkBalance);
-    // app.get('/seller/withdraw', seller.withdraw);
+    app.get('/', homeController.browse);
+    app.get('/browse', homeController.browse);
+    app.get('/domain/register', registerController.register);
+    app.get('/domain/isregistered', registerController.isRegistered);
+    app.get('/domain/getPrice', registerController.getPrice);
+
+    app.get('/domain/edit', editController.editIp);
+    app.get('/domain/transfer', editController.transferDomainOwner);
+    app.get('/domain/extend', editController.extendDomainExpDate);
+
+    app.get('/domain/receipt', editController.extendDomainExpDate);
+    
     // app.post('/ipfs/upload', ipfs.upload);
 
 

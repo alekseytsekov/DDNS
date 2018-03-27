@@ -22,6 +22,13 @@ window.addEventListener('load', function () {
         $('.error-msg').show();
     }
 
+    function showInfoMsg(text) {
+        $('.info-msg').text(text);
+        $('.info-msg').removeClass('hide-me');
+        $('.info-msg').show();
+    }
+
     msgHandler.showSuccessMsg = showSuccessMsg;
     msgHandler.showErrorMsg = showErrorMsg;
+    msgHandler.showInfoMsg = showInfoMsg;
 })

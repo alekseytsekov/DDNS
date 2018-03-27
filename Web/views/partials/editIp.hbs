@@ -1,0 +1,78 @@
+<div class="row">
+    <div class="col-xs-12 text-center">
+        <h1><b>Edit domain ip</b></h1>
+    </div>
+
+    <br>
+
+    <div class="form-group col-xs-6 col-xs-offset-3">
+
+        <br>
+        <br>
+        <br>
+
+        <div class="form-label"><label for="userAddress" class="form">Current address</label></div>
+        <input class="form-control" id="userAddress" type="text">
+        <br>
+        <label for="domain-name">Domain name</label>
+        <input class="form-control" id="domain-name" name="domain-name" type="text" placeholder="domain name"> 
+        <br>
+        <label for="new-ip">new IP address</label>
+        <input class="form-control" id="new-ip" name="new-ip" type="text" placeholder="ip address"> 
+        <br>
+        <button id="btn-domain-newip" type="button" class="btn btn-default">Save</button>
+
+    </div>
+
+</div>
+
+<script>
+    window.addEventListener('load', function(){
+        if(hasMetaMask){
+
+            $('#btn-domain-newip').click(changeDomainIp);
+
+            function changeDomainIp(){
+                
+                let domainName = $('#domain-name').val();
+                let newIpAddress = $('#new-ip').val();
+
+                if (domainName.length < 5) {
+                    msgHandler.showErrorMsg('Domain length should be more than 4 symbols!')
+                    return;
+                }
+
+                let option = {
+                    from: currentUserAddress,
+                    gas: 1000000,
+                };
+
+                contract.getDomainOwner(domainName, option, function(err, result){
+
+                    let isUserCurrentOwner = currentUserAddress === result;
+                    if(isUserCurrentOwner){
+
+                        contract.edit(domainName, ipConverter.ipToHex(newIpAddress), option, function (err, result) {
+                            if (err) {
+                                //showErrorMsg("Something went wrong!");
+                                console.log(err);
+                                return;
+                            }
+
+                            // tx hash
+                            let msg =
+                            `Successfully change domain IP address! Transaction hash: <a target="_blank" href="https://ropsten.etherscan.io/tx/${result}">${result}</a>`;
+                            msgHandler.showSuccessMsg(msg);
+                        });
+
+                    } else {
+                        msgHandler.showErrorMsg('You are NOT owner of this domain!');
+                    }
+                    
+                });
+            }
+        }
+    })
+</script>
+
+<script src="/javascripts/ipConverter.js"></script>

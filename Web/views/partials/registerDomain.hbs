@@ -36,29 +36,42 @@
                 let domainName = $('#domain-name').val();
                 let ipAddress = $('#ip-address').val();
 
-                //if (!isAddressValid(userAddress)) {
-                    //return;
-                //}
+                if (domainName.length < 5) {
+                    msgHandler.showErrorMsg('Domain length should be more than 4 symbols!')
+                    return;
+                }
 
                 let option = {
                     from: userAddress,
-                    value: `${web3.toWei(1, 'ether')}`,
                     gas: 1000000,
                 };
 
-                contract.register(domainName, ipConverter.ipToHex(ipAddress), option, function (err, result) {
+                contract.getPrice(domainName, option, function (err, result) {
                     if (err) {
-                        //showErrorMsg("Something went wrong!");
+                        msgHandler.showErrorMsg("Something went wrong!");
                         console.log(err);
                         return;
                     }
 
-                    console.log(result);
+                    option.value = result;// `${web3.toWei(1, 'ether')}`,
+
+                    contract.register(domainName, ipConverter.ipToHex(ipAddress), option, function (err, result) {
+                        if (err) {
+                            msgHandler.showErrorMsg("Something went wrong!");
+                            console.log(err);
+                            return;
+                        }
+
+                        // tx hash
+				        let msg =
+					    `Successfully register a domain!! Transaction hash: <a target="_blank" href="https://ropsten.etherscan.io/tx/${result}">${result}</a>`;
+                        msgHandler.showSuccessMsg(msg);
+                    });
+
+                    //$('#show-result').val(web3._extend.utils.fromWei(result, 'ether'));
                 });
             }
         }
-
-        
     })
 </script>
 
