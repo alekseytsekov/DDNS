@@ -142,7 +142,8 @@ contract DDNS is Ownable {
             ownerAllDomains[msg.sender].push(Domain({domainName : domain}));
         }
         
-        emit LogRegister(msg.sender, domainHash, now);
+        //emit LogRegister(msg.sender, domainHash, now);
+        LogRegister(msg.sender, domainHash, now);
     }
     
     
@@ -168,7 +169,8 @@ contract DDNS is Ownable {
         //ownerReceipts[newOwner][domainHash].push(Receipt({domainName : domain, amountPaidWei : 0, timestamp: now, expires: ownerReceipts[msg.sender][domainHash][lastReceipt - 1].expires }));
         ownerReceipts[newOwner][domainHash].push(Receipt({ amountPaidWei : 0, timestamp: now, expires: ownerReceipts[msg.sender][domainHash][lastReceipt - 1].expires }));
         
-        emit LogTransferDomain(newOwner, msg.sender, domainHash);
+        //emit LogTransferDomain(newOwner, msg.sender, domainHash);
+        LogTransferDomain(newOwner, msg.sender, domainHash);
     }
     
     function extendExpirationDate(bytes domain) public payable isActive(domain) canEdit(domain) isPriceMatch(domain) {
@@ -180,7 +182,8 @@ contract DDNS is Ownable {
         
         domainExpirationDate[domainHash] = ownerReceipts[msg.sender][domainHash][lastReceiptIndex].expires;
         
-        emit LogUpdateExipationDate(msg.sender, domainHash, ownerReceipts[msg.sender][domainHash][lastReceiptIndex].expires);
+        //emit LogUpdateExipationDate(msg.sender, domainHash, ownerReceipts[msg.sender][domainHash][lastReceiptIndex].expires);
+        LogUpdateExipationDate(msg.sender, domainHash, ownerReceipts[msg.sender][domainHash][lastReceiptIndex].expires);
     }
     
     function getOwnerReceiptByDomain(bytes domain) public view returns (uint[], uint[], uint[]) {
@@ -205,7 +208,7 @@ contract DDNS is Ownable {
         return (price, createdOn, expires);
     }
     
-    function getIP(bytes domain) public isDomainExist(domain) isActive(domain) returns (bytes4) {
+    function getIP(bytes domain) public view isDomainExist(domain) returns (bytes4) { // isActive(domain)
         
         return domainIp[keccak256(domain)];
     }

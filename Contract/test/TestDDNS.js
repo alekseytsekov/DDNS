@@ -285,7 +285,7 @@ contract('DDNS', function (accounts) {
 
             });
 
-            it("Register domain, another should not exist", async function () {
+            it("Register domain correctly, another domain should not exist", async function () {
 
                 let domainName = 'hello_hello';
 
@@ -328,6 +328,40 @@ contract('DDNS', function (accounts) {
                     await contractInstance.register(domainName, ipToHex(ip2), userOptions);
 
                     assert.isTrue(false, 'Domain is registered twice!')
+                } catch (e) {
+                    assert.isTrue(true);
+                }
+            });
+
+            it("Try register domain with short name. Should throw exception!", async function () {
+
+                let domainName = 'hell';
+
+                userOptions.value = toEthers(1);
+
+                try {
+                    await contractInstance.register(domainName, ipToHex(ip1), userOptions);
+                    //await contractInstance.register(domainName, ipToHex(ip2), userOptions);
+
+                    assert.isTrue(false, 'Domain is registered!')
+                } catch (e) {
+                    assert.isTrue(true);
+                }
+            });
+
+            it("Try register domain with long name. Should throw exception!", async function () {
+
+                let domainName = '0123456789aleks0123456789aleks0123456789aleks0123456789aleks';
+
+                userOptions.value = toEthers(1);
+
+                
+
+                try {
+                    await contractInstance.register(domainName, ipToHex(ip1), userOptions);
+                    //await contractInstance.register(domainName, ipToHex(ip2), userOptions);
+
+                    assert.isTrue(false, 'Domain is registered!')
                 } catch (e) {
                     assert.isTrue(true);
                 }
@@ -428,6 +462,7 @@ contract('DDNS', function (accounts) {
                     from: _user
                 });
 
+                //console.log(ip);
                 ip = hex2ip(ip);
 
                 assert.equal(ip, ip1, "Invalid IP address");
@@ -570,10 +605,8 @@ contract('DDNS', function (accounts) {
                     let domainName = 'hello';
                     userOptions.value = toEthers(1);
 
-                    let ipEdit = ipToHex(ip2);
-
                     await contractInstance.register(domainName, ipToHex(ip1), userOptions);
-                    await contractInstance.edit(domainName, ipEdit, {
+                    await contractInstance.edit(domainName, ipToHex(ip2), {
                         from: _user
                     });
                     let newIp = await contractInstance.getIP(domainName);
@@ -581,6 +614,8 @@ contract('DDNS', function (accounts) {
 
                     assert.equal(ip2, newIp, "The IP is not edited!");
                 });
+
+                
 
                 it("Edit - Owner should edit ip address. Multiple domains", async function () {
 
@@ -696,6 +731,7 @@ contract('DDNS', function (accounts) {
                     userOptions.value = toEthers(1);
 
                     await contractInstance.register(domainName, ipToHex(ip1), userOptions);
+                    await contractInstance.register(domainName + 1, ipToHex(ip1), userOptions);
                     await contractInstance.transferDomain(domainName, _user2, {
                         from: _user
                     });
@@ -706,6 +742,24 @@ contract('DDNS', function (accounts) {
                     let numOfReceipt = result[0].length;
 
                     assert.equal(1, numOfReceipt, "After transfer receipt does not transfer to the new owner!");
+                });
+
+                it("Transfer - Owner should transfer domain. Check receipt of the old owner.", async function () {
+                    let domainName = 'hello';
+                    userOptions.value = toEthers(1);
+
+                    await contractInstance.register(domainName, ipToHex(ip1), userOptions);
+                    await contractInstance.extendExpirationDate(domainName, userOptions);
+                    await contractInstance.transferDomain(domainName, _user2, {
+                        from: _user
+                    });
+
+                    let result = await contractInstance.getOwnerReceiptByDomain(domainName, {
+                        from: _user
+                    });
+                    let numOfReceipt = result[0].length;
+
+                    assert.equal(2, numOfReceipt, "After transfer receipt does not transfer to the new owner!");
                 });
 
                 it("Transfer - Not owner should NOT transfer domain. Throw exception", async function () {
@@ -770,7 +824,6 @@ contract('DDNS', function (accounts) {
             describe('Extend expiration date', () => {
 
                 showReceiptListInfo();
-
 
                 //////// Extend expiration date ///////////
                 it("Expiration Date - Owner check expiration date after registration.", async function () {
@@ -1084,10 +1137,16 @@ function ipToHex(ip) {
         //console.log('=> ' + parseInt(tokens[i]).toString(16));
         //console.log('=> ' + tokens[i].toString(16));
 
-        if (parseInt(tokens[i]) < 10) {
+         if (parseInt(tokens[i]) < 10) {
+            
             asHex += '0' + tokens[i];
         } else {
-            asHex += parseInt(tokens[i]).toString(16);
+
+            let hex = parseInt(tokens[i]).toString(16);
+            if(hex.length < 2){
+                hex = '0' + hex;
+            }
+            asHex += hex;
         }
 
     }

@@ -47,11 +47,14 @@
                     }
 
                     console.log(ipConverter.hex2ip(result));
-                    //let domainIp = 'http://' +  ipConverter.hex2ip(result);
-                    let domainIp =  ipConverter.hex2ip(result);
+                    let domainIp = 'http://' +  ipConverter.hex2ip(result);
+                    //let domainIp =  ipConverter.hex2ip(result);
 
                     $('#browse-wrapper').attr('href', domainIp);
-                    $('#browse-wrapper').html('open domain in new tab:' + `<h3 class="inline-block">${domainName}</h3>`);
+                    $('#browse-wrapper').html('open domain in new tab:' + `<h3 class="click inline-block">${domainName}</h3>`);
+                    
+
+                    $('#browse-wrapper h3').trigger('click');
                 });
 
             }

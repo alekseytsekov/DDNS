@@ -18,4 +18,9 @@ module.exports = {
 
         res.render('partials/receipts');
     },
+    withdraw : async (req, res) => {
+
+
+        res.render('partials/withdraw');
+    },
 };

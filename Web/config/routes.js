@@ -20,6 +20,7 @@ module.exports = app => {
     app.get('/domain/extend', editController.extendDomainExpDate);
 
     app.get('/domain/receipt', homeController.viewReceipt);
+    app.get('/withdraw', homeController.withdraw);
     
     // app.post('/ipfs/upload', ipfs.upload);
 

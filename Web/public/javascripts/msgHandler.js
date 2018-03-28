@@ -23,9 +23,9 @@ window.addEventListener('load', function () {
     }
 
     function showInfoMsg(text) {
-        $('.info-msg').text(text);
-        $('.info-msg').removeClass('hide-me');
-        $('.info-msg').show();
+        $('.i-msg').text(text);
+        $('.i-msg').removeClass('hide-me');
+        $('.i-msg').show();
     }
 
     msgHandler.showSuccessMsg = showSuccessMsg;
