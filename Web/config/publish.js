@@ -2,7 +2,7 @@ const solc = require('solc');
 const fs = require('fs');
 
 var Web3 = require("web3");
-var web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));
+var web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:9545"));
 //const web3 = new Web3('http://127.0.0.1:8545');
 
 const ownerAddress = "0x627306090abab3a6e1400e9345bc60c78a8bef57";

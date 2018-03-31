@@ -5,6 +5,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+const config = require('./config/config');
+
 //var index = require('./routes/index');
 //var users = require('./routes/users');
 
@@ -34,6 +36,19 @@ app.use(bodyParser.urlencoded({limit: '2mb', extended: true}));
 //app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(function (req, res, next) {
+  
+  let contractInfo = {
+      //owner : config.development.contractOwner,
+      contractAddress : config.development.contractAddress,
+      //abi : config.development.contractAbi,
+  };
+
+  res.locals.contractInfo = contractInfo;
+
+  next();
+})
 
 routes(app);
 
