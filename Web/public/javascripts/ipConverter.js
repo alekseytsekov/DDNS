@@ -17,7 +17,12 @@ const ipConverter = {
             if (parseInt(tokens[i]) < 10) {
                 asHex += '0' + tokens[i];
             } else {
-                asHex += parseInt(tokens[i]).toString(16);
+                //asHex += parseInt(tokens[i]).toString(16);
+                let hex = parseInt(tokens[i]).toString(16);
+                if(hex.length < 2){
+                    hex = '0' + hex;
+                }
+                asHex += hex;
             }
 
         }

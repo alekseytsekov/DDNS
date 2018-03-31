@@ -113,6 +113,7 @@
 
                         for(let i = 0; i < numOfReceipts; i++){
                             let paidPrice =  web3._extend.utils.fromWei(JSON.parse(result[0][i]), 'ether');
+                            console.log(JSON.parse(result[1][i]));
                             let paidOn = timeConverter(JSON.parse(result[1][i]));
                             let expiresOn = timeConverter(JSON.parse(result[2][i]))
 
@@ -131,7 +132,13 @@
                 
 
                 function timeConverter(UNIX_timestamp){
+
                     var a = new Date(UNIX_timestamp * 1000);
+
+                    //let b = web3.eth.getBlock(web3.eth.blockNumber).timestamp
+                    //console.log('orig ' + UNIX_timestamp);
+                    //console.log('after process' + a);
+
                     var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
                     var year = a.getFullYear();
                     var month = months[a.getMonth()];
