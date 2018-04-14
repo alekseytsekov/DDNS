@@ -1,2 +1,2 @@
 # DDNS
-DApp : Decentralized DNS system
+DApp : Decentralized DNS
